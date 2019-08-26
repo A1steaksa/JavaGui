@@ -18,6 +18,7 @@ public class Window extends Entity {
 
     public static int windowHandleHeight = 25;
     private static int titleFontSize = 20;
+    private static int windowMinHeight = windowHandleHeight + 50;
     private static String fontName = "Courier New";
 
     private static Color BACKGROUND_COLOR = Color.gray;
@@ -25,18 +26,28 @@ public class Window extends Entity {
     private static Color BORDER_COLOR = Color.black;
     private static Color HANDLE_TEXT_COLOR = Color.white;
 
+
     public enum ResizeMode {
-        Horizontal,
-        Vertical,
-        Both
+        None,
+        North,
+        NorthEast,
+        East,
+        SouthEast,
+        South,
+        SouthWest,
+        West,
+        NorthWest
     }
 
     private boolean beingDragged = false;
-    private boolean beingResized = false;
     private int dragXOffset = 0;
     private int dragYOffset = 0;
-    private ResizeMode resizeMode;
+
+    private ResizeMode resizeMode = ResizeMode.None;
     private int resizeEdgeSize = 15;
+    private int resizeXOffset = 0;
+    private int resizeYOffset = 0;
+    private Rectangle resizeWindowStart;
 
     private int shadowOffsetX = 3;
     private int shadowOffsetY = 3;
@@ -116,6 +127,14 @@ public class Window extends Entity {
     @Override
     public void setY( int y ){
         super.setY( y - resizeEdgeSize );
+    }
+
+    public void setEntireWidth( int width ){
+        super.setWidth( width );
+    }
+
+    public void setEntireHeight( int height ){
+        super.setHeight( height );
     }
 
     @Override
@@ -254,33 +273,99 @@ public class Window extends Entity {
 
         }
 
-        // Check if the mouse was over the bottom right corner
-        boolean onRightEdge = localX >= getWidth() - resizeEdgeSize;
-        boolean onBottomEdge = localY >= getHeight() - resizeEdgeSize;
+        /*
+            Resizing
+         */
 
-        if( onRightEdge || onBottomEdge ){
-            beingResized = true;
+        // North
+        boolean northResize = (
+                localX >= visualBoundsOffset.x &&
+                localX <= visualBoundsOffset.x + ( getWidth() + visualBoundsOffset.width ) &&
+                localY < visualBoundsOffset.y
+        );
 
-            if( onRightEdge && onBottomEdge ){
-                resizeMode = ResizeMode.Both;
+        // NorthEast
+        boolean northEastResize = (
+                localX > visualBoundsOffset.x + ( getWidth() + visualBoundsOffset.width ) &&
+                localY < visualBoundsOffset.y
+        );
 
-                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.SE_RESIZE_CURSOR ) );
+        // East
+        boolean eastResize = (
+                localX > visualBoundsOffset.x + ( getWidth() + visualBoundsOffset.width ) &&
+                localY >= visualBoundsOffset.y &&
+                localY <= visualBoundsOffset.y + ( getHeight() + visualBoundsOffset.height  )
+        );
 
-            }else if( onRightEdge ){
-                resizeMode = ResizeMode.Horizontal;
+        // SouthEast
+        boolean southEastResize = (
+                localX > visualBoundsOffset.x + ( getWidth() + visualBoundsOffset.width ) &&
+                localY > visualBoundsOffset.y + ( getHeight() + visualBoundsOffset.height  )
+        );
 
-                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.E_RESIZE_CURSOR ) );
+        // South
+        boolean southResize = (
+                localX >= visualBoundsOffset.x &&
+                localX <= visualBoundsOffset.x + ( getWidth() + visualBoundsOffset.width ) &&
+                localY > visualBoundsOffset.y + ( getHeight() + visualBoundsOffset.height  )
+        );
 
-            }else{
-                resizeMode = ResizeMode.Vertical;
+        // SouthWest
+        boolean southWestResize = (
+                localX < visualBoundsOffset.x &&
+                localY > visualBoundsOffset.y + ( getHeight() + visualBoundsOffset.height  )
+        );
 
-                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.S_RESIZE_CURSOR ) );
+        // West
+        boolean westResize = (
+                localX < visualBoundsOffset.x &&
+                localY >= visualBoundsOffset.y &&
+                localY <= visualBoundsOffset.y + ( getHeight() + visualBoundsOffset.height  )
+        );
 
-            }
+        // NorthWest
+        boolean northWestResize = (
+                localX < visualBoundsOffset.x &&
+                localY < visualBoundsOffset.y
+        );
 
-            // Save the event's relative location
-            dragXOffset = localX;
-            dragYOffset = localY;
+        if( northResize ){
+            resizeMode = ResizeMode.North;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.N_RESIZE_CURSOR ) );
+        }else
+        if( northEastResize ){
+            resizeMode = ResizeMode.NorthEast;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.NE_RESIZE_CURSOR ) );
+        }else
+        if( eastResize ){
+            resizeMode = ResizeMode.East;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.E_RESIZE_CURSOR ) );
+        }else
+        if( southEastResize ){
+            resizeMode = ResizeMode.SouthEast;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.SE_RESIZE_CURSOR ) );
+        }else
+        if( southResize ){
+            resizeMode = ResizeMode.South;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.S_RESIZE_CURSOR ) );
+        }else
+        if( southWestResize ){
+            resizeMode = ResizeMode.SouthWest;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.SW_RESIZE_CURSOR ) );
+        }else
+        if( westResize ){
+            resizeMode = ResizeMode.West;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.W_RESIZE_CURSOR ) );
+        }else
+        if( northWestResize ){
+            resizeMode = ResizeMode.NorthWest;
+            MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.NW_RESIZE_CURSOR ) );
+        }
+
+        if( resizeMode != ResizeMode.None ){
+            resizeXOffset = localX;
+            resizeYOffset = localY;
+            resizeWindowStart = getGlobalBounds();
         }
 
     }
@@ -288,14 +373,14 @@ public class Window extends Entity {
     @Override
     public void onMouseUp(MouseEvent e) {
         beingDragged = false;
-        beingResized = false;
+        resizeMode = ResizeMode.None;
         MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor(  Cursor.DEFAULT_CURSOR ) );
     }
 
     @Override
     public void onMouseClick(MouseEvent e) {
         beingDragged = false;
-        beingResized = false;
+        resizeMode = ResizeMode.None;
         MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor(  Cursor.DEFAULT_CURSOR ) );
     }
 
@@ -308,24 +393,46 @@ public class Window extends Entity {
         if( beingDragged ){
             setX( e.getX() - dragXOffset + visualBoundsOffset.x );
             setY( e.getY() - dragYOffset + visualBoundsOffset.y );
-            Renderer.drawFrame();
         }
 
-        // Set this window's width and height based on where its being dragged
-        if( beingResized ){
+        // Resizing the window
+        switch( resizeMode ){
 
-            if( resizeMode == ResizeMode.Horizontal || resizeMode == ResizeMode.Both ){
-                int newWidth = Math.max( e.getX() - getGlobalX() - visualBoundsOffset.x, titleText.getX() + titleText.getWidth() + closeButton.getWidth() ) ;
-                setWidth( newWidth );
-            }
+            case North:
 
-            if( resizeMode == ResizeMode.Vertical || resizeMode == ResizeMode.Both ){
-                int newHeight = Math.max( e.getY() - getGlobalY() - visualBoundsOffset.y, windowHandleHeight * 3 );
-                setHeight( newHeight );
-            }
+                int yOffset = Math.max(  visualBoundsOffset.y - resizeYOffset, 0 );
+                int newHeight = Math.max(
+                        ( resizeWindowStart.y + resizeWindowStart.height ) - e.getY() - ( yOffset - visualBoundsOffset.y ),
+                        ( windowMinHeight )
+                );
 
+                System.out.println( newHeight );
+
+                setEntireHeight( newHeight );
+
+                // Only move the window if we're not hitting the min size limit
+                if( newHeight > windowMinHeight ){
+                    setY( e.getY() + yOffset );
+                }
+
+                break;
+
+            case East:
+                int xOffset =  visualBoundsOffset.x - ( resizeWindowStart.width - resizeXOffset );
+                int newWidth = Math.max(
+                        ( e.getX() - getGlobalX() + visualBoundsOffset.x - xOffset ),
+                        ( titleText.getX() + titleText.getWidth() + closeButton.getWidth() )
+                );
+                setEntireWidth( newWidth );
+                break;
+
+            case None:
+                break;
+        }
+
+        // Draw a new frame if we changed something
+        if( resizeMode != ResizeMode.None || beingDragged ){
             Renderer.drawFrame();
-
         }
 
     }
