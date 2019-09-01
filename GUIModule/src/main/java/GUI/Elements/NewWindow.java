@@ -6,6 +6,7 @@ import org.w3c.dom.css.Rect;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 public class NewWindow extends Entity {
 
@@ -19,7 +20,7 @@ public class NewWindow extends Entity {
     private int westOffset = 0;
 
     // The position and size of the window when we started resizing it
-    private Rectangle resizeStartBounds;
+    private Rectangle resizeStartBounds = new Rectangle();
 
 
     // What direction, if any, we're currently resizing in
@@ -67,16 +68,12 @@ public class NewWindow extends Entity {
         bounds.y += y;
 
         // Full bounds
-        g.setColor( new Color( 0.1f, 0.1f, 0.1f, 0.25f ) );
-        g.fillRect( x, y, getWidth(), getHeight() );
+        //g.setColor( Color.red );
+        //g.fillRect( x, y, getWidth(), getHeight() );
 
         //Background
-        g.setColor( Color.white );
-        g.fillRect( bounds.x, bounds.y, bounds.width, bounds.height );
-
-        // Border
-        g.setColor( Color.black );
-        g.drawRect( bounds.x, bounds.y, bounds.width, bounds.height );
+        BufferedImage background =  Util.readImage( "C:\\Users\\a1ste\\IdeaProjects\\GUI\\GUIModule\\src\\main\\resources\\button_up.png" );
+        Renderer.drawSlicedImage( g, background, 2, bounds.x, bounds.y, bounds.width, bounds.height );
 
     }
 
@@ -143,61 +140,62 @@ public class NewWindow extends Entity {
     @Override
     public void onMouseDrag(MouseEvent e) {
 
-        // Defined here because Java cannot handle variable declarations in multiple cases
-        int newWidth = 0;
-        int newHeight = 0;
-
-        // Calculate the sizes for the directions so we can user and combine them later
-        int northHeight = ( ( resizeStartBounds.y + resizeStartBounds.height ) - e.getY() ) - northOffset;
-        int eastWidth = ( e.getX() - getGlobalX() ) - eastOffset;
-        int southHeight = ( e.getY() - getGlobalY() ) - southOffset;
-        int westWidth = ( ( resizeStartBounds.x + resizeStartBounds.width ) - e.getX() ) - westOffset;
-
-        // Resize the window based on which mode we're in using the sizes above
-        switch ( resizeMode ) {
-            case North:
-                setHeight( northHeight );
-                setY( e.getY() + northOffset );
-                break;
-            case NorthWest:
-                setHeight( northHeight );
-                setY( e.getY() + northOffset );
-
-                setWidth( westWidth );
-                setX( e.getX() + westOffset );
-                break;
-            case West:
-                setWidth( westWidth );
-                setX( e.getX() + westOffset );
-                break;
-            case SouthWest:
-                setHeight( southHeight );
-
-                setWidth( westWidth );
-                setX( e.getX() + westOffset );
-                break;
-            case South:
-                setHeight( southHeight );
-                break;
-            case SouthEast:
-                setHeight( southHeight );
-
-                setWidth( eastWidth );
-                break;
-            case East:
-                setWidth( eastWidth );
-                break;
-            case NorthEast:
-                setHeight( northHeight );
-                setY( e.getY() + northOffset );
-
-                setWidth( eastWidth );
-                break;
-            case None:
-                break;
-        }
-
         if( resizeMode != ResizeMode.None ){
+
+            // Defined here because Java cannot handle variable declarations in multiple cases
+            int newWidth = 0;
+            int newHeight = 0;
+
+            // Calculate the sizes for the directions so we can user and combine them later
+            int northHeight = ( ( resizeStartBounds.y + resizeStartBounds.height ) - e.getY() ) - northOffset;
+            int eastWidth = ( e.getX() - getGlobalX() ) - eastOffset;
+            int southHeight = ( e.getY() - getGlobalY() ) - southOffset;
+            int westWidth = ( ( resizeStartBounds.x + resizeStartBounds.width ) - e.getX() ) - westOffset;
+
+            // Resize the window based on which mode we're in using the sizes above
+            switch ( resizeMode ) {
+                case North:
+                    setHeight( northHeight );
+                    setY( e.getY() + northOffset );
+                    break;
+                case NorthWest:
+                    setWidth( westWidth );
+                    setX( e.getX() + westOffset );
+
+                    setHeight( northHeight );
+                    setY( e.getY() + northOffset );
+                    break;
+                case West:
+                    setWidth( westWidth );
+                    setX( e.getX() + westOffset );
+                    break;
+                case SouthWest:
+                    setWidth( westWidth );
+                    setX( e.getX() + westOffset );
+
+                    setHeight( southHeight );
+                    break;
+                case South:
+                    setHeight( southHeight );
+                    break;
+                case SouthEast:
+                    setWidth( eastWidth );
+
+                    setHeight( southHeight );
+                    break;
+                case East:
+                    setWidth( eastWidth );
+                    break;
+                case NorthEast:
+                    setWidth( eastWidth );
+
+                    setHeight( northHeight );
+                    setY( e.getY() + northOffset );
+                    break;
+                case None:
+                    break;
+            }
+
             Renderer.drawFrame();
         }
 
