@@ -51,8 +51,6 @@ public abstract class Entity {
         return this.y;
     }
 
-
-
     public int getGlobalX(){
         // If we have no parent, our global X is our normal X
         if( parent == null ){
@@ -130,6 +128,11 @@ public abstract class Entity {
         return this.height;
     }
 
+    public void setSize( int width, int height ){
+        setWidth( width );
+        setHeight( height );
+    }
+
     public Rectangle getBounds(){
         return new Rectangle( x, y, width, height );
     }
@@ -180,7 +183,12 @@ public abstract class Entity {
         // Clip to parent's child bounds
         if( Renderer.clipEnabled ){
             if( getParent() != null ){
+
                 Rectangle clip = getParent().getGlobalChildBounds().intersection( this.getGlobalChildBounds() );
+
+                // The clips rectangle is off by 1
+                clip.width += 1;
+                clip.height += 1;
 
                 //If this entity is entirely clipped off, no children can be drawn so we can stop drawing the hierarchy
                 if( clip.width <= 0 || clip.height <= 0 ){
@@ -199,25 +207,6 @@ public abstract class Entity {
         // Draw our children
         for( Entity child : children ){
             child.drawHierarchy( g, child.getGlobalX(), child.getGlobalY() );
-        }
-
-        if( this.getParent() != null ){
-
-            Rectangle globalBounds = this.getGlobalBounds();
-            g.setColor( Color.blue );
-            g.drawRect( globalBounds.x, globalBounds.y, globalBounds.width, globalBounds.height );
-
-            Rectangle childBounds = this.getGlobalChildBounds();
-            g.setColor( Color.green );
-            //g.drawRect( childBounds.x, childBounds.y, childBounds.width, childBounds.height );
-
-            Rectangle clipBounds = this.getGlobalChildBounds().intersection( getParent().getGlobalChildBounds() );
-            g.setColor( Color.red );
-            //g.drawRect( clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height );
-
-            g.setColor( Color.black );
-            //g.drawString( this.getClass() + "", clipBounds.x, clipBounds.y );
-
         }
 
     }

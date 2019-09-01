@@ -1,9 +1,7 @@
 package GUI;
 
-import GUI.Elements.Entity;
+import GUI.Elements.*;
 import GUI.Elements.Image;
-import GUI.Elements.Util;
-import GUI.Elements.Window;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -16,23 +14,7 @@ public class RootEntity extends Entity {
 
     public void initializeDesktop(){
 
-        Window window = new Window( 100, 100, 500, 300, "A very cool window" );
-
-
-        BufferedImage bufferedImage = Util.readImage( "C:/Users/a1ste/Pictures/GUI/Smile.png" );
-        Image img = new Image( 100, 100, 100, 100, bufferedImage ){
-            @Override
-            public void layoutEntity() {
-
-                Rectangle childBounds = getParent().getChildBounds();
-
-                setX( childBounds.x + childBounds.width - getWidth() );
-                setY( childBounds.y + childBounds.height - getHeight() );
-
-            }
-        };
-        img.passthroughInput = true;
-        img.setParent( window );
+        NewWindow window = new NewWindow( 100, 100, 500, 300 );
 
     }
 

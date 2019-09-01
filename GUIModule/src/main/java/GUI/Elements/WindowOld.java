@@ -9,7 +9,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-public class Window extends Entity {
+public class WindowOld extends Entity {
 
 
     /*
@@ -57,7 +57,7 @@ public class Window extends Entity {
 
     private String title;
 
-    public Window( int startX, int startY, int startWidth, int startHeight, String startTitle ){
+    public WindowOld(int startX, int startY, int startWidth, int startHeight, String startTitle ){
         super();
 
         setPos( startX, startY );
@@ -99,8 +99,8 @@ public class Window extends Entity {
             }
 
             public void layoutEntity(){
-                if( getParent() instanceof Window ){
-                    Rectangle visualBoundsOffset = ( (Window) getParent() ).getVisualBoundsOffset();
+                if( getParent() instanceof WindowOld){
+                    Rectangle visualBoundsOffset = ( (WindowOld) getParent() ).getVisualBoundsOffset();
 
                     // Right align
                     setX( visualBoundsOffset.x + ( getParent().getWidth() + visualBoundsOffset.width ) - getWidth() - closeButtonRightPadding );
@@ -161,6 +161,16 @@ public class Window extends Entity {
             -resizeEdgeSize * 2,
             -resizeEdgeSize * 2
         );
+    }
+
+    public int getVisualBoundsWidth(){
+        Rectangle visualBoundsOffset = getVisualBoundsOffset();
+        return getWidth() + visualBoundsOffset.x + visualBoundsOffset.width;
+    }
+
+    public int getVisualBoundsHeight(){
+        Rectangle visualBoundsOffset = getVisualBoundsOffset();
+        return getHeight() + visualBoundsOffset.y + visualBoundsOffset.height;
     }
 
     public String getTitle(){
@@ -251,7 +261,7 @@ public class Window extends Entity {
     public void onMouseDown(MouseEvent e) {
         moveToFront();
 
-        // Get the local x and y of the event
+        // Get the local x and y of the event, local to this window visually
         int localX = this.localizeX( e.getX() );
         int localY = this.localizeY( e.getY() );
 
@@ -384,6 +394,14 @@ public class Window extends Entity {
         MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor(  Cursor.DEFAULT_CURSOR ) );
     }
 
+    public int getDistanceFromEast( int x ){
+
+        int localX = localizeX( x );
+
+        return resizeWindowStart.width - localX;
+
+    }
+
     @Override
     public void onMouseDrag(MouseEvent e) {
 
@@ -418,11 +436,13 @@ public class Window extends Entity {
                 break;
 
             case East:
-                int xOffset =  visualBoundsOffset.x - ( resizeWindowStart.width - resizeXOffset );
-                int newWidth = Math.max(
-                        ( e.getX() - getGlobalX() + visualBoundsOffset.x - xOffset ),
-                        ( titleText.getX() + titleText.getWidth() + closeButton.getWidth() )
-                );
+
+                // How far into the handle the mouse is
+                int eastOffset = getDistanceFromEast( e.getX() );
+
+                // (How far from the left of the window the mouse is) - (Handle adjustment)
+                int newWidth = ( e.getX() - getGlobalX() - eastOffset );
+                System.out.println( eastOffset );
                 setEntireWidth( newWidth );
                 break;
 
