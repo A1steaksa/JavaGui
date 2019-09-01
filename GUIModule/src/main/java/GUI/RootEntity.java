@@ -1,6 +1,7 @@
 package GUI;
 
 import GUI.Elements.*;
+import GUI.Elements.Button;
 import GUI.Elements.Image;
 
 import java.awt.*;
@@ -14,7 +15,9 @@ public class RootEntity extends Entity {
 
     public void initializeDesktop(){
 
-        NewWindow window = new NewWindow( 100, 100, 500, 300 );
+        NewWindow window = new NewWindow( 100, 100, 500, 500 );
+        Button applyButton = new Button( 100, 100, 75, 23, "Cancel" );
+        applyButton.setParent( window );
 
     }
 

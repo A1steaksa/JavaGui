@@ -24,6 +24,11 @@ public abstract class Entity {
     // Whether input should be passed directly to the parent
     public boolean passthroughInput = false;
 
+    public Entity( int x, int y, int width, int height ){
+        this();
+        setPos( x, y );
+        setSize( width, height );
+    }
     public Entity(){
         setParent( RootEntity.rootEntity );
     }

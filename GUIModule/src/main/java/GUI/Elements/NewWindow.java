@@ -1,5 +1,6 @@
 package GUI.Elements;
 
+import GUI.Core.GUIUtil;
 import GUI.Core.Renderer;
 import org.w3c.dom.css.Rect;
 
@@ -10,8 +11,21 @@ import java.awt.image.BufferedImage;
 
 public class NewWindow extends Entity {
 
+    // Whether the window is currently being dragged
+    private  boolean isDragging = false;
+
+    // How far from the window origin the drag was started at
+    private int draggingXOffset = 0;
+    private int draggingYOffset = 0;
+
+    // The height of the top window title bar
+    private int titleBarHeight = 18;
+
+    // The padding around the sides and top of the title bar
+    private int titleBarPadding = 3;
+
     // How far from the edge of the window should we allow resizing in
-    int resizeBorderSize = 15;
+    private int resizeBorderSize = 10;
 
     // How far from the edges the most recent mouseDown event was
     private int northOffset = 0;
@@ -22,6 +36,8 @@ public class NewWindow extends Entity {
     // The position and size of the window when we started resizing it
     private Rectangle resizeStartBounds = new Rectangle();
 
+    // The size, around the visual bounds, taken up by the border itself
+    int internalBorderSize = 3;
 
     // What direction, if any, we're currently resizing in
     public ResizeMode resizeMode = ResizeMode.None;
@@ -56,6 +72,11 @@ public class NewWindow extends Entity {
     }
 
     @Override
+    public Rectangle getChildBounds(){
+        return getVisualBounds();
+    }
+
+    @Override
     public void layoutEntity() {
 
     }
@@ -67,13 +88,13 @@ public class NewWindow extends Entity {
         bounds.x += x;
         bounds.y += y;
 
-        // Full bounds
-        //g.setColor( Color.red );
-        //g.fillRect( x, y, getWidth(), getHeight() );
 
         //Background
-        BufferedImage background =  Util.readImage( "C:\\Users\\a1ste\\IdeaProjects\\GUI\\GUIModule\\src\\main\\resources\\button_up.png" );
-        Renderer.drawSlicedImage( g, background, 2, bounds.x, bounds.y, bounds.width, bounds.height );
+        GUIUtil.getInstance().drawRaisedRect( g, bounds.x, bounds.y, bounds.width, bounds.height );
+
+        // Title bar / Dragging handle
+        g.setColor( new Color( 0, 0, 100 ) );
+        g.fillRect( bounds.x + titleBarPadding, bounds.y + titleBarPadding, bounds.width - titleBarPadding * 2, titleBarHeight );
 
     }
 
@@ -84,6 +105,10 @@ public class NewWindow extends Entity {
         int localY = localizeY( e.getY() );
 
         Rectangle bounds = getVisualBounds();
+
+        /*
+           Resizing
+         */
 
         // Where we clicked on the resizing edges
         northOffset = bounds.y - localY;
@@ -122,19 +147,37 @@ public class NewWindow extends Entity {
             resizeStartBounds = getGlobalBounds();
         }
 
+        /*
+            Dragging
+         */
+
+        Rectangle titleBar = new Rectangle(
+                getGlobalX() + bounds.x + titleBarPadding,
+                getGlobalY() + bounds.y + titleBarPadding,
+                bounds.width - titleBarPadding * 2,
+                titleBarHeight
+        );
+
+        // Check if we clicked on the title bar
+        if( Util.isPointWithinRectangle(  e.getX(), e.getY(), titleBar ) ){
+            isDragging = true;
+            draggingXOffset = localX;
+            draggingYOffset = localY;
+        }
+
     }
 
     @Override
     public void onMouseUp(MouseEvent e) {
-        // Reset resize mode
         resizeMode = ResizeMode.None;
+        isDragging = false;
 
     }
 
     @Override
     public void onMouseClick(MouseEvent e) {
-        // Reset resize mode
         resizeMode = ResizeMode.None;
+        isDragging = false;
     }
 
     @Override
@@ -195,7 +238,14 @@ public class NewWindow extends Entity {
                 case None:
                     break;
             }
+        }
 
+        if( isDragging ){
+            setX( e.getX() - draggingXOffset );
+            setY( e.getY() - draggingYOffset );
+        }
+
+        if( resizeMode != ResizeMode.None || isDragging ){
             Renderer.drawFrame();
         }
 

@@ -10,10 +10,7 @@ public class Image extends Entity {
     BufferedImage image;
 
     public Image(int startX, int startY, int startWidth, int startHeight, BufferedImage image ){
-        setPos( startX, startY );
-        setWidth( startWidth );
-        setHeight( startHeight );
-
+        super( startX, startY, startWidth, startHeight );
         this.image = image;
     }
 

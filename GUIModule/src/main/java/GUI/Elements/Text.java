@@ -45,7 +45,7 @@ public class Text extends Entity {
         int stringWidth = metrics.stringWidth( this.text );
         setWidth( stringWidth );
 
-        int stringHeight = metrics.getAscent();
+        int stringHeight = metrics.getAscent() + metrics.getDescent();
         setHeight( stringHeight );
     }
 
@@ -56,11 +56,9 @@ public class Text extends Entity {
 
     @Override
     public void drawEntity(Graphics2D g, int x, int y) {
-
         g.setColor( textColor );
         g.setFont( font );
         g.drawString( text, x, y + metrics.getAscent() );
-
     }
 
     @Override
