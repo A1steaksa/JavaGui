@@ -48,4 +48,19 @@ public class Image extends Entity {
     public void onChildInteraction(InputEvent e) {
 
     }
+
+    @Override
+    public void onMouseEnter( MouseEvent e ) {
+
+    }
+
+    @Override
+    public void onMouseExit( MouseEvent e ) {
+
+    }
+
+    @Override
+    public void onMouseHoverMove( MouseEvent e ) {
+
+    }
 }

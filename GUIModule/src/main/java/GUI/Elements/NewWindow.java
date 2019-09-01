@@ -1,13 +1,12 @@
 package GUI.Elements;
 
 import GUI.Core.GUIUtil;
+import GUI.Core.MainPanel;
 import GUI.Core.Renderer;
-import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 
 public class NewWindow extends Entity {
 
@@ -27,6 +26,9 @@ public class NewWindow extends Entity {
     // How far from the edge of the window should we allow resizing in
     private int resizeBorderSize = 10;
 
+    // How far into the window's visual area the resize bounds should extend
+    private int resizeBorderInset = -3;
+
     // How far from the edges the most recent mouseDown event was
     private int northOffset = 0;
     private int eastOffset = 0;
@@ -40,9 +42,9 @@ public class NewWindow extends Entity {
     int internalBorderSize = 3;
 
     // What direction, if any, we're currently resizing in
-    public ResizeMode resizeMode = ResizeMode.None;
+    public ResizeDirection resizeMode = ResizeDirection.None;
 
-    public enum ResizeMode {
+    public enum ResizeDirection {
         None,
         North,
         NorthEast,
@@ -98,58 +100,75 @@ public class NewWindow extends Entity {
 
     }
 
-    @Override
-    public void onMouseDown( MouseEvent e ) {
-
-        int localX = localizeX( e.getX() );
-        int localY = localizeY( e.getY() );
+    public void updateOffsets( int x, int y ){
+        int localX = localizeX( x );
+        int localY = localizeY( y );
 
         Rectangle bounds = getVisualBounds();
-
-        /*
-           Resizing
-         */
 
         // Where we clicked on the resizing edges
         northOffset = bounds.y - localY;
         eastOffset =  localX - ( bounds.x + bounds.width );
         southOffset = localY - ( bounds.y + bounds.height );
         westOffset = -( localX - bounds.x );
+    }
 
-        // Setting our resizing mode
-        resizeMode = ResizeMode.None;
-        if( northOffset > 0 && eastOffset > 0 ){
-            resizeMode = ResizeMode.NorthEast;
-        }else if( southOffset > 0 && eastOffset > 0 ){
-            resizeMode = ResizeMode.SouthEast;
-        }else if( southOffset > 0 && westOffset > 0 ){
-            resizeMode = ResizeMode.SouthWest;
-        }else if( northOffset > 0 && westOffset > 0 ){
-            resizeMode = ResizeMode.NorthWest;
-        }else if( northOffset > 0 ){
-            resizeMode = ResizeMode.North;
-        }else if( eastOffset > 0 ){
-            resizeMode = ResizeMode.East;
-        }else if( southOffset > 0 ){
-            resizeMode = ResizeMode.South;
-        }else if( westOffset > 0 ){
-            resizeMode = ResizeMode.West;
+    /**
+     * Determines which, if any, resize direction is indicated by a given X, Y coordinate
+     * @param x
+     * @param y
+     * @return
+     */
+    public ResizeDirection getResizeDirection( int x, int y ){
+        updateOffsets( x, y );
+
+        // Find out if any offsets indicate that the point is over a resizing border
+        if( northOffset > resizeBorderInset && eastOffset > resizeBorderInset ){
+            return ResizeDirection.NorthEast;
+        }else if( southOffset > resizeBorderInset && eastOffset > resizeBorderInset ){
+            return ResizeDirection.SouthEast;
+        }else if( southOffset > resizeBorderInset && westOffset > resizeBorderInset ){
+            return ResizeDirection.SouthWest;
+        }else if( northOffset > resizeBorderInset && westOffset > resizeBorderInset ){
+            return ResizeDirection.NorthWest;
+        }else if( northOffset > resizeBorderInset ){
+            return ResizeDirection.North;
+        }else if( eastOffset > resizeBorderInset ){
+            return ResizeDirection.East;
+        }else if( southOffset > resizeBorderInset ){
+            return ResizeDirection.South;
+        }else if( westOffset > resizeBorderInset ){
+            return ResizeDirection.West;
         }
 
-        // Adjust offsets for more convenient later user
+        return ResizeDirection.None;
+    }
+
+    @Override
+    public void onMouseDown( MouseEvent e ) {
+
+        // Setting our resizing mode
+        resizeMode = getResizeDirection( e.getX(), e.getY() );
+
+        // Save the window's current position and bounds
+        if( resizeMode != ResizeDirection.None ){
+            resizeStartBounds = getGlobalBounds();
+        }
+
+        // Update and adjust offsets to take resize border into account for use later
         northOffset -= resizeBorderSize;
         eastOffset -= resizeBorderSize;
         southOffset -= resizeBorderSize;
         westOffset -= resizeBorderSize;
 
-        // Save the window's current position and bounds
-        if( resizeMode != ResizeMode.None ){
-            resizeStartBounds = getGlobalBounds();
-        }
-
         /*
             Dragging
          */
+
+        int localX = localizeX( e.getX() );
+        int localY = localizeY( e.getY() );
+
+        Rectangle bounds = getVisualBounds();
 
         Rectangle titleBar = new Rectangle(
                 getGlobalX() + bounds.x + titleBarPadding,
@@ -169,21 +188,21 @@ public class NewWindow extends Entity {
 
     @Override
     public void onMouseUp(MouseEvent e) {
-        resizeMode = ResizeMode.None;
+        resizeMode = ResizeDirection.None;
         isDragging = false;
 
     }
 
     @Override
     public void onMouseClick(MouseEvent e) {
-        resizeMode = ResizeMode.None;
+        resizeMode = ResizeDirection.None;
         isDragging = false;
     }
 
     @Override
     public void onMouseDrag(MouseEvent e) {
 
-        if( resizeMode != ResizeMode.None ){
+        if( resizeMode != ResizeDirection.None ){
 
             // Defined here because Java cannot handle variable declarations in multiple cases
             int newWidth = 0;
@@ -245,7 +264,7 @@ public class NewWindow extends Entity {
             setY( e.getY() - draggingYOffset );
         }
 
-        if( resizeMode != ResizeMode.None || isDragging ){
+        if( resizeMode != ResizeDirection.None || isDragging ){
             Renderer.drawFrame();
         }
 
@@ -253,6 +272,53 @@ public class NewWindow extends Entity {
 
     @Override
     public void onChildInteraction(InputEvent e) {
+
+    }
+
+    @Override
+    public void onMouseEnter( MouseEvent e ) {
+        MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
+    }
+
+    @Override
+    public void onMouseExit( MouseEvent e ) {
+        MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
+    }
+
+    @Override
+    public void onMouseHoverMove( MouseEvent e ) {
+
+        ResizeDirection resizeDirection = getResizeDirection( e.getX(), e.getY() );
+
+        switch ( resizeDirection ){
+            case North:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.N_RESIZE_CURSOR ) );
+                break;
+            case NorthEast:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.NE_RESIZE_CURSOR ) );
+                break;
+            case East:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.E_RESIZE_CURSOR ) );
+                break;
+            case SouthEast:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.SE_RESIZE_CURSOR ) );
+                break;
+            case South:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.S_RESIZE_CURSOR ) );
+                break;
+            case SouthWest:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.SW_RESIZE_CURSOR ) );
+                break;
+            case West:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.W_RESIZE_CURSOR ) );
+                break;
+            case NorthWest:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.NW_RESIZE_CURSOR ) );
+                break;
+            case None:
+                MainPanel.mainPanel.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
+                break;
+        }
 
     }
 }

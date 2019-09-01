@@ -243,6 +243,9 @@ public abstract class Entity {
     public abstract void onMouseClick( MouseEvent e );
     public abstract void onMouseDrag( MouseEvent e );
     public abstract void onChildInteraction( InputEvent e );
+    public abstract void onMouseEnter( MouseEvent e );
+    public abstract void onMouseExit( MouseEvent e );
+    public abstract void onMouseHoverMove( MouseEvent e );
 
     //endregion
 

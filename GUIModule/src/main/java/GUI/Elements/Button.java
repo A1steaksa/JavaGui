@@ -81,6 +81,21 @@ public class Button extends Entity {
 
     }
 
+    @Override
+    public void onMouseEnter( MouseEvent e ) {
+
+    }
+
+    @Override
+    public void onMouseExit( MouseEvent e ) {
+
+    }
+
+    @Override
+    public void onMouseHoverMove( MouseEvent e ) {
+
+    }
+
     /**
      * What action this button performs when clicked.
      * This should be overridden with your custom behavior.

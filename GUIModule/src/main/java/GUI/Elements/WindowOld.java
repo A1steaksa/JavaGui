@@ -466,6 +466,21 @@ public class WindowOld extends Entity {
     }
 
     @Override
+    public void onMouseEnter( MouseEvent e ) {
+
+    }
+
+    @Override
+    public void onMouseExit( MouseEvent e ) {
+
+    }
+
+    @Override
+    public void onMouseHoverMove( MouseEvent e ) {
+
+    }
+
+    @Override
     public String toString(){
         return "Window " + title;
     }

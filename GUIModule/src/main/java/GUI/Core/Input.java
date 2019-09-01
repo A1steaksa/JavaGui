@@ -12,12 +12,11 @@ import java.awt.event.MouseMotionListener;
 
 public class Input {
 
-    //the entity that the mouse was pressed down on
+    // The entity that the mouse was pressed down on
     Entity pressedEntity;
 
-    // Where, relative to its position, the mouse began to drag
-    private int dragOffsetX = 0;
-    private int dragOffsetY = 0;
+    // The entity currently being hovered over
+    Entity hoveredEntity = RootEntity.rootEntity;
 
     public Input( JPanel panel ){
 
@@ -107,6 +106,28 @@ public class Input {
 
             @Override
             public void mouseMoved(MouseEvent mouseEvent) {
+
+                // What the mouse moved over
+                Entity newHoveredEntity = Util.getEntityAtPoint(  mouseEvent.getX(), mouseEvent.getY()  );
+
+                // If we've hovered over a new entity
+                if( hoveredEntity != newHoveredEntity ){
+
+                    // We're no longer hovering over what we were hovering on
+                    if( hoveredEntity != null ){
+                        hoveredEntity.onMouseExit( mouseEvent );
+                    }
+
+                    // Hover on the new entity
+                    if( newHoveredEntity != null ){
+                        newHoveredEntity.onMouseEnter( mouseEvent );
+                    }
+
+                    hoveredEntity = newHoveredEntity;
+
+                }else{
+                    hoveredEntity.onMouseHoverMove( mouseEvent );
+                }
 
             }
         });
