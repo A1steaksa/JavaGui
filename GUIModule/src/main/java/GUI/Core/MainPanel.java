@@ -15,6 +15,8 @@ public class MainPanel extends JPanel {
 
         mainPanel = this;
 
+        this.setDoubleBuffered( true );
+
         // Start tracking input for this panel
         Input input = new Input( this );
 

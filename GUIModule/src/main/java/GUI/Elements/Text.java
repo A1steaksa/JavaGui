@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
 
 public class Text extends Entity {
 
-    private Color textColor = Color.black;
+    private Color textColor;
     private String text = "";
     private Font font;
 
@@ -36,7 +36,7 @@ public class Text extends Entity {
 
     public void setFont( Font font ){
         this.font = font;
-        metrics = Renderer.getGraphics().getFontMetrics( this.font );
+        metrics = Renderer.getCurrentFrameGraphics().getFontMetrics( this.font );
     }
 
     public void setText( String text ){

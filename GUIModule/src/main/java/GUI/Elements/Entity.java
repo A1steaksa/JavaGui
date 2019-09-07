@@ -89,7 +89,6 @@ public abstract class Entity {
 
     /**
      * The rectangle, in entity-local space, where this entity's children should be positioned and rendered
-     * @return
      */
     public Rectangle getChildBounds(){
         return new Rectangle(
@@ -109,6 +108,14 @@ public abstract class Entity {
             childBounds.width,
             childBounds.height
         );
+    }
+
+    public Rectangle getParentGlobalChildBounds(){
+        if( getParent() != null ){
+            return getParent().getParentGlobalChildBounds().intersection( getGlobalChildBounds() );
+        }{
+            return getGlobalChildBounds();
+        }
     }
 
     //endregion
@@ -189,7 +196,10 @@ public abstract class Entity {
         if( Renderer.clipEnabled ){
             if( getParent() != null ){
 
-                Rectangle clip = getParent().getGlobalChildBounds().intersection( this.getGlobalChildBounds() );
+
+
+                //Rectangle clip = getParent().getGlobalChildBounds().intersection( this.getGlobalChildBounds() );
+                Rectangle clip = getParentGlobalChildBounds();
 
                 // The clips rectangle is off by 1
                 clip.width += 1;

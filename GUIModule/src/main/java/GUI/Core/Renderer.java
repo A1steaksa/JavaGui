@@ -17,27 +17,52 @@ public class Renderer {
     // Whether or not to clip children when drawing them
     public static boolean clipEnabled = true;
 
+    // Frames
+    private static BufferedImage currentFrame = new BufferedImage( 100, 100, BufferedImage.TYPE_INT_BGR );
+    private static BufferedImage nextFrame;
+
+    public static Graphics2D getCurrentFrameGraphics(){
+        return (Graphics2D) currentFrame.getGraphics();
+    }
+
     public static void drawAllEntities( Graphics2D g ){
         //Show every entity, starting with the root entity
         RootEntity.rootEntity.drawHierarchy( g, RootEntity.rootEntity.getGlobalX(), RootEntity.rootEntity.getGlobalY() );
     }
 
-    public static Graphics2D getGraphics(){
-        return (Graphics2D) MainPanel.mainPanel.getGraphics();
+    public static void paintFrameToPanel( BufferedImage bufferedImage ){
+        Graphics g = MainPanel.mainPanel.getGraphics();
+        g.drawImage( bufferedImage, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null );
     }
 
     public static void drawFrame(){
-        MainPanel.mainPanel.repaint();
+        if( !Renderer.enabled ){
+            return;
+        }
+
+        nextFrame = new BufferedImage( RootEntity.rootEntity.getWidth(), RootEntity.rootEntity.getHeight(), BufferedImage.OPAQUE );
+        drawAllEntities( nextFrame.createGraphics() );
+        paintFrameToPanel( nextFrame );
+        currentFrame = nextFrame;
     }
 
-    public static void drawEntity(Entity entity, int x, int y ){
-        Graphics2D g = getGraphics();
+    /**
+     * Draws a given entity onto the current frame and displays the modified frame
+     */
+    public static void redrawEntity( Entity entity, int x, int y ){
+        Graphics2D g = (Graphics2D) currentFrame.getGraphics();
         entity.drawEntity( g, x, y );
+        paintFrameToPanel( nextFrame );
+        paintFrameToPanel( currentFrame );
     }
 
-    public static void drawEntityHierarchy( Entity entity, int x, int y ){
-        Graphics2D g = getGraphics();
+    /**
+     * Draws a given entity hierarchy onto the current frame and displays the modified frame
+     */
+    public static void redrawEntityHierarchy( Entity entity, int x, int y ){
+        Graphics2D g = (Graphics2D) currentFrame.getGraphics();
         entity.drawHierarchy( g, x, y );
+        paintFrameToPanel( currentFrame );
     }
 
 

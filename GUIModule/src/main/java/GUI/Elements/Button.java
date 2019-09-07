@@ -16,6 +16,9 @@ public class Button extends Entity {
 
     private int textPadding = 4;
 
+    // How far the button text is offset when the button is pressed
+    private int pressedTextOffset = 2;
+
     public Text buttonText;
     public Image buttonImage;
 
@@ -55,19 +58,37 @@ public class Button extends Entity {
     @Override
     public void onMouseDown(MouseEvent e) {
         heldDown = true;
-        Renderer.drawEntityHierarchy( this, getGlobalX(), getGlobalY() );
+
+        buttonText.setPos(
+                buttonText.getX() + pressedTextOffset,
+                buttonText.getY() + pressedTextOffset
+        );
+
+        Renderer.redrawEntityHierarchy( this, getGlobalX(), getGlobalY() );
     }
 
     @Override
     public void onMouseUp(MouseEvent e) {
         heldDown = false;
-        Renderer.drawEntityHierarchy( this, getGlobalX(), getGlobalY() );
+
+        buttonText.setPos(
+                buttonText.getX() - pressedTextOffset,
+                buttonText.getY() - pressedTextOffset
+        );
+
+        Renderer.redrawEntityHierarchy( this, getGlobalX(), getGlobalY() );
     }
 
     @Override
     public void onMouseClick(MouseEvent e) {
         heldDown = false;
-        Renderer.drawEntityHierarchy( this, getGlobalX(), getGlobalY() );
+
+        buttonText.setPos(
+                buttonText.getX() - pressedTextOffset,
+                buttonText.getY() - pressedTextOffset
+        );
+
+        Renderer.redrawEntityHierarchy( this, getGlobalX(), getGlobalY() );
         clickAction();
     }
 
