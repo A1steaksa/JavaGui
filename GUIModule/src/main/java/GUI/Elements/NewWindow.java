@@ -3,6 +3,7 @@ package GUI.Elements;
 import GUI.Core.GUIUtil;
 import GUI.Core.MainPanel;
 import GUI.Core.Renderer;
+import GUI.RootEntity;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -46,11 +47,15 @@ public class NewWindow extends Entity {
     private Rectangle resizeStartBounds = new Rectangle();
 
     // The size, around the visual bounds, taken up by the border itself
-    int internalBorderSize = 3;
+    private int internalBorderSize = 3;
 
     // What direction, if any, we're currently resizing in
     public ResizeDirection resizeMode = ResizeDirection.None;
 
+    private int buttonSpacing = 3;
+    private Button closeButton;
+    private Button minimizeButton;
+    
     public enum ResizeDirection {
         None,
         North,
@@ -68,7 +73,41 @@ public class NewWindow extends Entity {
 
         setPos( x, y );
         setSize( width, height );
+        
+        closeButton = new Button( 0, 0, 16, 16, Util.readImage( "GUIModule/src/main/resources/close.png" ) ){
+			@Override
+			public void layoutEntity() {
+				Rectangle bounds = NewWindow.this.getVisualBounds();
+				setY( bounds.y + titleBarPadding + 1 );
+				setX( bounds.x + bounds.width - titleBarPadding - getWidth() - 1 );
+			}
+    
+            @Override
+            public void clickAction() {
+                close();
+            }
+        };
+        closeButton.drawUnclipped = true;
+        closeButton.buttonImage.drawUnclipped = true;
+        closeButton.setParent( this );
+    
+        minimizeButton = new Button( 0, 0, 16, 16, Util.readImage( "GUIModule/src/main/resources/minimize.png" ) ){
+            @Override
+            public void layoutEntity() {
+                Rectangle bounds = NewWindow.this.getVisualBounds();
+                setY( bounds.y + titleBarPadding + 1 );
+                setX( closeButton.getX() - getWidth() - buttonSpacing );
+            }
+        };
+        minimizeButton.drawUnclipped = true;
+        minimizeButton.buttonImage.drawUnclipped = true;
+        minimizeButton.setParent( this );
 
+    }
+    
+    public void close(){
+        getParent().children.remove( this );
+        Renderer.drawFrame();
     }
 
     private Rectangle getVisualBounds(){
@@ -112,7 +151,7 @@ public class NewWindow extends Entity {
         // Title bar / Dragging handle
         g.setColor( new Color( 0, 0, 100 ) );
         g.fillRect( bounds.x + titleBarPadding, bounds.y + titleBarPadding, bounds.width - titleBarPadding * 2, titleBarHeight );
-
+        
     }
 
     public void updateOffsets( int x, int y ){

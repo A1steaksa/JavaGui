@@ -15,6 +15,12 @@ public abstract class Entity {
     private Entity parent;
     public List<Entity> children = Collections.synchronizedList( new LinkedList<Entity>() );
 
+    // Whether this entity should be drawn during normal drawing passes
+    public boolean shouldDraw = true;
+    
+    // Whether or not to draw this entity without any parental clipping
+    public boolean drawUnclipped = false;
+    
     // The bounds around this Entity that it receives input in
     private int x = 0;
     private int y = 0;
@@ -191,9 +197,13 @@ public abstract class Entity {
     //region Rendering
 
     public final void drawHierarchy( Graphics2D g, int x, int y ){
-
+        
+        if( !shouldDraw ){
+            return;
+        }
+        
         // Clip to parent's child bounds
-        if( Renderer.clipEnabled ){
+        if( Renderer.clipEnabled && !this.drawUnclipped ){
             if( getParent() != null ){
 
                 // The rectangle we can draw in based on all of our parents

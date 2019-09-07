@@ -20,8 +20,8 @@ public class RootEntity extends Entity {
             @Override
             public void layoutEntity() {
                 setPos(
-                    getParent().getWidth() - getWidth() - 10,
-                    getParent().getHeight() - getHeight() - 10
+                    getParent().getWidth() - getWidth() - 50,
+                    getParent().getHeight() - getHeight() - 50
                 );
             }
         };

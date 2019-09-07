@@ -6,6 +6,7 @@ import GUI.Core.Renderer;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 public class Button extends Entity {
 
@@ -14,21 +15,21 @@ public class Button extends Entity {
     public static Color BUTTON_TEXT_COLOR = Color.black;
     public static String buttonFontName = "Microsoft Sans Serif";
 
-    private int textPadding = 4;
+    private int textPadding = 3;
 
-    // How far the button text is offset when the button is pressed
-    private int pressedTextOffset = 2;
+    // How far the button contents is offset when the button is pressed
+    private int pressedContentOffset = 2;
 
     public Text buttonText;
     public Image buttonImage;
 
     private boolean heldDown = false;
 
-    public Button( int startX, int startY, int startWidth, int startHeight, String startText ){
-        super( startX, startY, startWidth, startHeight );
+    public Button( int x, int y, int width, int height, String startText ){
+        super( x, y, width, height );
 
         // Button text
-        int fontSize = Math.max( getHeight() - textPadding * 2, 5 );
+        int fontSize = 14;
         Font buttonFont = new Font( buttonFontName, Font.PLAIN, fontSize );
 
         // Create the text
@@ -38,7 +39,15 @@ public class Button extends Entity {
         // Because the text only knows it s own size after we've created it, we can now center it
         buttonText.setX( getWidth() / 2 - buttonText.getWidth() / 2 );
 
-        buttonText.setY( textPadding / 2 );
+        buttonText.setY( textPadding );
+    }
+    
+    public Button( int x, int y, int width, int height, BufferedImage buttonImage ){
+        super( x, y, width, height );
+        
+        this.buttonImage = new Image( 0, 0, getWidth(), getHeight(), buttonImage );
+        this.buttonImage.setParent( this );
+        this.buttonImage.passthroughInput = true;
     }
 
     @Override
@@ -59,10 +68,21 @@ public class Button extends Entity {
     public void onMouseDown(MouseEvent e) {
         heldDown = true;
 
-        buttonText.setPos(
-                buttonText.getX() + pressedTextOffset,
-                buttonText.getY() + pressedTextOffset
-        );
+        if( buttonText != null ){
+            buttonText.setPos(
+                    buttonText.getX() + pressedContentOffset,
+                    buttonText.getY() + pressedContentOffset
+            );
+        }
+    
+        if( buttonImage != null ){
+            buttonImage.setPos(
+                    buttonImage.getX() + pressedContentOffset,
+                    buttonImage.getY() + pressedContentOffset
+            );
+        }
+        
+        
 
         Renderer.redrawEntityHierarchy( this, getGlobalX(), getGlobalY() );
     }
@@ -70,11 +90,20 @@ public class Button extends Entity {
     @Override
     public void onMouseUp(MouseEvent e) {
         heldDown = false;
-
-        buttonText.setPos(
-                buttonText.getX() - pressedTextOffset,
-                buttonText.getY() - pressedTextOffset
-        );
+    
+        if( buttonText != null ){
+            buttonText.setPos(
+                    buttonText.getX() - pressedContentOffset,
+                    buttonText.getY() - pressedContentOffset
+            );
+        }
+    
+        if( buttonImage != null ){
+            buttonImage.setPos(
+                    buttonImage.getX() - pressedContentOffset,
+                    buttonImage.getY() - pressedContentOffset
+            );
+        }
 
         Renderer.redrawEntityHierarchy( this, getGlobalX(), getGlobalY() );
     }
@@ -82,11 +111,20 @@ public class Button extends Entity {
     @Override
     public void onMouseClick(MouseEvent e) {
         heldDown = false;
-
-        buttonText.setPos(
-                buttonText.getX() - pressedTextOffset,
-                buttonText.getY() - pressedTextOffset
-        );
+    
+        if( buttonText != null ){
+            buttonText.setPos(
+                    buttonText.getX() - pressedContentOffset,
+                    buttonText.getY() - pressedContentOffset
+            );
+        }
+    
+        if( buttonImage != null ){
+            buttonImage.setPos(
+                    buttonImage.getX() - pressedContentOffset,
+                    buttonImage.getY() - pressedContentOffset
+            );
+        }
 
         Renderer.redrawEntityHierarchy( this, getGlobalX(), getGlobalY() );
         clickAction();
