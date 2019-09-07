@@ -196,9 +196,7 @@ public abstract class Entity {
         if( Renderer.clipEnabled ){
             if( getParent() != null ){
 
-
-
-                //Rectangle clip = getParent().getGlobalChildBounds().intersection( this.getGlobalChildBounds() );
+                // The rectangle we can draw in based on all of our parents
                 Rectangle clip = getParentGlobalChildBounds();
 
                 // The clips rectangle is off by 1

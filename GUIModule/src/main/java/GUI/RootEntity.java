@@ -16,7 +16,15 @@ public class RootEntity extends Entity {
     public void initializeDesktop(){
 
         NewWindow window = new NewWindow( 100, 100, 500, 500 );
-        Button applyButton = new Button( 100, 100, 75, 23, "Cancel" );
+        Button applyButton = new Button( 100, 100, 75, 23, "Cancel" ){
+            @Override
+            public void layoutEntity() {
+                setPos(
+                    getParent().getWidth() - getWidth() - 10,
+                    getParent().getHeight() - getHeight() - 10
+                );
+            }
+        };
         applyButton.setParent( window );
 
     }

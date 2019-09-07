@@ -26,8 +26,15 @@ public class NewWindow extends Entity {
     // How far from the edge of the window should we allow resizing in
     private int resizeBorderSize = 10;
 
-    // How far into the window's visual area the resize bounds should extend
-    private int resizeBorderInset = -3;
+    // How far out of the window's visual area the resize bounds should start
+    // Set to negative values to inset
+    private int resizeBorderOutset = -3;
+
+    // How far into the visual bounds the child bounds should be
+    private int childBorderInsetNorth = 21;
+    private int childBorderInsetEast = 3;
+    private int childBorderInsetSouth = 3;
+    private int childBorderInsetWest = 3;
 
     // How far from the edges the most recent mouseDown event was
     private int northOffset = 0;
@@ -75,7 +82,14 @@ public class NewWindow extends Entity {
 
     @Override
     public Rectangle getChildBounds(){
-        return getVisualBounds();
+
+        Rectangle bounds = getVisualBounds();
+        bounds.x += childBorderInsetWest;
+        bounds.y += childBorderInsetNorth;
+        bounds.width -= ( childBorderInsetWest + childBorderInsetEast );
+        bounds.height -= ( childBorderInsetSouth + childBorderInsetNorth );
+
+        return bounds;
     }
 
     @Override
@@ -90,6 +104,7 @@ public class NewWindow extends Entity {
         bounds.x += x;
         bounds.y += y;
 
+        g.setClip( bounds );
 
         //Background
         GUIUtil.getInstance().drawRaisedRect( g, bounds.x, bounds.y, bounds.width, bounds.height );
@@ -123,21 +138,21 @@ public class NewWindow extends Entity {
         updateOffsets( x, y );
 
         // Find out if any offsets indicate that the point is over a resizing border
-        if( northOffset > resizeBorderInset && eastOffset > resizeBorderInset ){
+        if( northOffset > resizeBorderOutset && eastOffset > resizeBorderOutset ){
             return ResizeDirection.NorthEast;
-        }else if( southOffset > resizeBorderInset && eastOffset > resizeBorderInset ){
+        }else if( southOffset > resizeBorderOutset && eastOffset > resizeBorderOutset ){
             return ResizeDirection.SouthEast;
-        }else if( southOffset > resizeBorderInset && westOffset > resizeBorderInset ){
+        }else if( southOffset > resizeBorderOutset && westOffset > resizeBorderOutset ){
             return ResizeDirection.SouthWest;
-        }else if( northOffset > resizeBorderInset && westOffset > resizeBorderInset ){
+        }else if( northOffset > resizeBorderOutset && westOffset > resizeBorderOutset ){
             return ResizeDirection.NorthWest;
-        }else if( northOffset > resizeBorderInset ){
+        }else if( northOffset > resizeBorderOutset ){
             return ResizeDirection.North;
-        }else if( eastOffset > resizeBorderInset ){
+        }else if( eastOffset > resizeBorderOutset ){
             return ResizeDirection.East;
-        }else if( southOffset > resizeBorderInset ){
+        }else if( southOffset > resizeBorderOutset ){
             return ResizeDirection.South;
-        }else if( westOffset > resizeBorderInset ){
+        }else if( westOffset > resizeBorderOutset ){
             return ResizeDirection.West;
         }
 
